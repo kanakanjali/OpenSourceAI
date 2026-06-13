@@ -1,0 +1,121 @@
+title,body,label
+Add keyboard shortcuts,"Add keyboard shortcuts for common actions like save, search, create new item, and navigate between sections to improve power user productivity.",feature
+Implement advanced search with filters,"Enhance the search functionality to support filtering by date range, category, author, status, and tags with the ability to save frequent searches.",feature
+Dark mode toggle does not persist after refresh,"When I enable dark mode and refresh the page, the setting resets to light mode. The preference is not being saved to localStorage correctly.",bug
+Implement role based access control,"Add granular role based permissions so organization admins can define custom roles with specific read, write, and delete permissions per resource type.",feature
+CSV import fails with BOM character,CSV files exported from Excel contain a BOM character at the start which causes the import parser to fail on the first row.,bug
+Add collaborative commenting system,"Allow users to add threaded comments on records with mentions using at symbol, reactions using emoji, and the ability to resolve comment threads.",feature
+Add AI powered writing assistant,"Integrate an AI assistant that can help users write better descriptions, suggest improvements to task titles, and auto generate summaries of long content.",feature
+Password reset email not sending,Users clicking forgot password do not receive the reset email. The email service integration is returning a 200 but emails are not delivered.,bug
+Add dark mode support,It would be great to have a dark mode option for users who prefer it or work in low light environments. This should include a toggle in settings and respect the system preference.,feature
+Improve mobile documentation formatting,"The documentation website is not mobile friendly. Text is too small, code blocks overflow the screen, and navigation menus are difficult to use on smartphones.",documentation
+Filter not applied correctly after sorting,"When a user sorts a table and then applies a filter, the filter is applied to the unfiltered dataset instead of maintaining the sort order.",bug
+Add mobile app for iOS and Android,"Develop native mobile applications for iOS and Android with core functionality including viewing, creating, and updating records with push notification support.",feature
+Dropdown menu closes unexpectedly on mobile,"On Android devices, the dropdown menu closes immediately after opening when the user tries to scroll through options.",bug
+Drag and drop reorder loses data on drop,"When reordering list items using drag and drop, the dropped item loses its associated data and only the title remains after repositioning.",bug
+Document rate limits and quotas clearly,The rate limiting documentation is vague and does not specify exact limits per endpoint. Developers need precise numbers to build reliable integrations.,documentation
+Update SDK documentation for Python 3.11,The Python SDK documentation has not been updated to reflect compatibility with Python 3.11 and newer async patterns. Code examples still use deprecated syntax.,documentation
+Document testing strategy and how to run tests,New contributors do not know how to run the test suite or what testing frameworks and conventions are used in the project. This should be documented in the developer guide.,documentation
+App crashes when uploading files larger than 10MB,When I try to upload a file larger than 10MB the app crashes with a null pointer exception. Steps to reproduce: 1. Open the app 2. Click upload 3. Select a file > 10MB. Expected: File uploads successfully. Actual: App crashes.,bug
+Add changelog with version history,There is no changelog documenting what changed between versions. Users upgrading need to know about breaking changes and new features in each release.,documentation
+Add examples for complex query syntax,"The advanced query documentation lacks real world examples showing how to combine multiple filters, use nested conditions, and work with date range queries.",documentation
+Support conditional logic in forms,Add the ability to show or hide form fields based on the values of other fields to create dynamic forms that adapt to user input.,feature
+Support OAuth login with GitHub,Add GitHub OAuth as a login option so developers can sign in with their existing GitHub account without creating a separate username and password.,feature
+Table row hover state sticks on touch devices,"On touch screen devices, the hover state on table rows remains active after the user lifts their finger causing visual inconsistency.",bug
+Implement smart duplicate detection,Automatically detect and warn users about potential duplicate records when creating new entries based on similarity of key fields.,feature
+Add two factor authentication,Implement two factor authentication using TOTP apps like Google Authenticator for enhanced account security. Users should be able to enable or disable this from their account settings.,feature
+File permissions not set correctly after upload,"Uploaded files are given 777 permissions instead of the expected 644, creating a security vulnerability.",bug
+User session expires too quickly,Users are being logged out after 5 minutes of inactivity even though the session timeout is configured to 30 minutes.,bug
+Add accessibility guidelines for developers,Documentation on building accessible features following WCAG 2.1 guidelines would help contributors ensure the product remains usable by people with disabilities.,documentation
+Add customizable dashboard widgets,"Allow users to build their own dashboards by selecting and arranging widgets showing metrics, charts, and data summaries relevant to their role.",feature
+Document backup and restore procedures,There is no documentation on how to back up and restore data. This is critical information for production deployments and disaster recovery planning.,documentation
+Form validation allows XSS in text fields,Text input fields do not sanitize HTML tags allowing cross site scripting attacks to be stored in the database.,bug
+Add dependency tracking between tasks,Allow users to define dependencies between tasks so blocked tasks are automatically flagged when their prerequisite tasks are delayed or incomplete.,feature
+OAuth token not refreshed before expiry,"The OAuth access token is not being proactively refreshed before it expires, causing authenticated requests to fail until the user logs in again.",bug
+Add security best practices guide,"A dedicated security guide covering topics like API key management, data encryption, and access control configuration would help users deploy the system securely.",documentation
+Add offline mode support,Allow the app to work offline with local data synchronization that automatically syncs changes when the internet connection is restored.,feature
+Add comparison with similar tools,A comparison page showing how this tool differs from similar alternatives would help new users understand the unique value proposition and make an informed choice.,documentation
+Push notifications not delivered on iOS 17,"After the iOS 17 update, push notifications stopped being delivered to users on iPhones. The registration token appears to be generated correctly.",bug
+Support markdown in descriptions,"Allow users to write descriptions using Markdown syntax with a live preview panel so they can format text with headers, lists, and code blocks.",feature
+Add runbook for common operational tasks,"A runbook documenting step by step procedures for common operational tasks like scaling, failover, and routine maintenance would help operations teams.",documentation
+API rate limiting not working correctly,The rate limiting middleware allows more requests than configured. Set to 100 requests per minute but allows up to 150 before blocking.,bug
+Two factor authentication code always invalid,Users with two factor authentication enabled are unable to log in because the TOTP codes are always rejected even when generated correctly.,bug
+Sidebar navigation collapses on route change,"The sidebar navigation unexpectedly collapses every time the route changes, requiring users to reopen it manually.",bug
+Add public sharing with permissions,Allow users to share specific records or views publicly with a link while controlling whether viewers can see all fields or only selected ones.,feature
+Autocomplete suggestions appear behind modal,Autocomplete dropdown suggestions appear behind modal dialogs due to incorrect z-index values in the CSS.,bug
+Add performance tuning guide,Documentation on how to optimize performance for large datasets and high traffic scenarios would be extremely valuable for enterprise users.,documentation
+Fix broken links in the integration guides,Several links in the third party integration guides are broken and lead to 404 pages. The Stripe and Salesforce integration pages are particularly affected.,documentation
+Search results page returns 404 after pagination,Clicking on page 2 or beyond in search results returns a 404 error. The URL generated for pagination is malformed.,bug
+Add glossary of technical terms,"The documentation uses technical terms without defining them. A glossary page would help new users understand concepts like idempotency, pagination tokens, and resource identifiers.",documentation
+Support file previews without download,"Add in-app preview support for common file types including PDF, images, spreadsheets, and documents so users do not need to download files to view them.",feature
+Scheduled jobs run twice on server restart,"When the server restarts while a scheduled job is running, the job executes twice causing duplicate records to be created in the database.",bug
+Support custom themes and branding,"Allow organization admins to customize the color scheme, logo, and typography to match their company branding guidelines.",feature
+Email templates render differently in Outlook,HTML email templates look correct in Gmail and Apple Mail but render with broken layout in Microsoft Outlook 2019 and older versions.,bug
+Notifications badge count not updating in real time,The notification bell badge count does not update in real time. Users need to refresh the page to see the updated count.,bug
+Implement audit logging for compliance,"Add comprehensive audit logs tracking all user actions with timestamps, IP addresses, and changed values for compliance and security monitoring.",feature
+Search index not updated after item deletion,"When an item is deleted, it still appears in search results because the search index is not updated synchronously after deletion.",bug
+Document the data model and schema,"A clear explanation of the underlying data model including entity relationships, field types, and constraints would help users understand how to structure their data effectively.",documentation
+Image thumbnails not loading on slow connections,"On slow 3G connections, image thumbnails fail to load and show broken image icons instead of a fallback placeholder.",bug
+Implement real time collaboration,Allow multiple users to work on the same document simultaneously with live cursor tracking and conflict resolution similar to Google Docs.,feature
+Support multi currency for financial data,Add support for storing and displaying monetary values in multiple currencies with automatic conversion using live exchange rates.,feature
+Add recurring task scheduling,"Allow users to create tasks that automatically repeat on daily, weekly, monthly, or custom schedules with options to set end dates or occurrence limits.",feature
+Document the webhook payload format,The webhook integration documentation does not describe the format of the payload sent to the endpoint. Users need to know the exact JSON structure to build receivers.,documentation
+Loading spinner never disappears on error,"When an API call fails, the loading spinner continues to show indefinitely instead of showing an error message.",bug
+Mobile keyboard pushes layout above viewport,"On iOS devices, when the virtual keyboard appears, the page layout gets pushed above the viewport making the input field invisible.",bug
+Improve error message documentation,Error messages in the app are cryptic and not explained in the documentation. Users who encounter ERRCODE 4012 or ERRCODE 5023 have no way to understand what went wrong.,documentation
+Add interactive API explorer to docs,An interactive API explorer similar to Swagger UI would allow developers to test API calls directly from the documentation without needing a separate tool.,documentation
+Date picker shows wrong timezone,"The date picker component displays dates in UTC instead of the user's local timezone, causing confusion for users in non-UTC regions.",bug
+WebSocket connection drops after 30 seconds,WebSocket connections are disconnecting every 30 seconds even when the client is active. The keepalive ping is not being sent correctly.,bug
+Add video tutorials for onboarding,New users would benefit greatly from short video tutorials covering the core workflows. Text documentation alone is not enough for users who prefer visual learning.,documentation
+Null pointer exception in payment processing module,A NullPointerException is thrown when processing payments with expired cards. The exception is not caught properly and causes a 500 error response.,bug
+PDF generation corrupts special characters,PDFs generated from content containing special characters like accents and symbols display garbled text instead of the correct characters.,bug
+Cache not invalidated after profile update,"After a user updates their profile information, the old cached data is still displayed to other users for up to 1 hour.",bug
+Document the caching behavior of the API,The API caching behavior is undocumented. Users do not know when to expect cached versus fresh responses and how to force cache invalidation when needed.,documentation
+Export to CSV fails for datasets over 5000 rows,Attempting to export datasets with more than 5000 rows results in a timeout error. The export process does not handle large datasets efficiently.,bug
+Implement email to task conversion,Allow users to forward emails to a special address that automatically creates tasks from the email content with the sender as the requester.,feature
+Fix inconsistent terminology throughout docs,The documentation uses different terms for the same concepts across pages. For example workspace and organization are used interchangeably causing confusion.,documentation
+Add architecture overview diagram,New contributors to the project would benefit from a high level architecture diagram showing how the main components interact and the flow of data through the system.,documentation
+Add API rate limit dashboard,"Provide a dashboard showing API usage statistics, rate limit consumption, and historical request volumes for developers using the API.",feature
+Add activity timeline for each record,Show a chronological timeline of all changes and actions performed on each record so users can see the full history of modifications.,feature
+Add API authentication examples to docs,"The API documentation is missing examples showing how to authenticate requests using Bearer tokens. Please add code examples in Python, JavaScript, and curl.",documentation
+Add email digest notifications,Provide users the option to receive a daily or weekly email digest of activity instead of individual real time notifications.,feature
+Update getting started guide for version 3,The getting started guide still references version 2 installation steps. It needs to be updated to reflect the new version 3 setup process and configuration options.,documentation
+Support webhooks for third party integrations,"Add webhook support so users can configure external URLs to receive event notifications when records are created, updated, or deleted.",feature
+Add deprecation notices for old API endpoints,Several API endpoints are deprecated but the documentation does not indicate this. Users need clear deprecation warnings with migration paths to the new endpoints.,documentation
+Support custom fields and data types,"Allow organization admins to add custom fields to any record type with support for text, number, date, dropdown, checkbox, and URL data types.",feature
+Document environment variables and configuration,The list of available environment variables is scattered across multiple pages. A single comprehensive configuration reference would be very helpful.,documentation
+Support bulk import from CSV,Allow users to import multiple records at once by uploading a CSV file. The import should validate each row and show a summary of successful and failed imports.,feature
+Add project templates library,Create a library of pre built project templates that users can use as starting points to quickly set up common workflows without configuring from scratch.,feature
+Add data export to multiple formats,"Allow users to export their data in CSV, JSON, Excel, and PDF formats from the dashboard with options to select specific date ranges and fields.",feature
+Document the plugin system for contributors,"Contributors wanting to build plugins have no documentation on the plugin API, available hooks, and how to package and distribute plugins.",documentation
+Support multiple languages and localization,"Add internationalization support for at least Spanish, French, German, Japanese, and Portuguese with automatic language detection based on browser settings.",feature
+Support table relationships and linked records,Allow users to create relationships between different data tables and link records across tables to build relational data structures without writing SQL.,feature
+Avatar upload crops image incorrectly,The avatar image cropper cuts off the top portion of the uploaded image regardless of how the user positions the crop area.,bug
+Add tutorial for building a custom integration,A step by step tutorial walking through the process of building a custom integration from scratch would greatly help developers getting started with the API.,documentation
+Implement smart search suggestions,"Add predictive search suggestions that appear as the user types based on their search history, recent items, and popular searches across the platform.",feature
+Implement data versioning and rollback,Add version history for all records allowing users to see previous versions and roll back to any earlier state with a confirmation step.,feature
+Document data retention and privacy policies,"Technical documentation on how user data is stored, retained, and deleted would help enterprise customers assess compliance with GDPR and other privacy regulations.",documentation
+Build fails on Windows due to path separator,The build script uses forward slashes in file paths which causes failures on Windows where backslashes are expected by the file system.,bug
+Report generation crashes for date ranges over 1 year,Generating reports with a date range exceeding 12 months causes the server to run out of memory and crash the process.,bug
+Translate documentation to Spanish,A significant portion of users are Spanish speaking and have requested translated documentation. Starting with the getting started guide and API reference would have the most impact.,documentation
+Login fails with correct credentials on Safari,Users on Safari browser cannot log in even with correct username and password. The form submits but redirects back to login page with no error message shown.,bug
+Add Slack integration for alerts,Integrate with Slack so users can receive important alerts and notifications directly in their Slack channels with configurable trigger conditions.,feature
+Chart tooltip shows NaN for zero values,Bar chart tooltips display NaN instead of 0 when the data point value is exactly zero.,bug
+Memory leak in background sync service,"The background sync service gradually consumes more memory over time. After running for 6 hours, memory usage goes from 200MB to over 2GB causing the process to get killed.",bug
+Infinite scroll triggers multiple API calls,"The infinite scroll implementation fires multiple simultaneous API requests when the user scrolls quickly, causing duplicate data to appear.",bug
+Update screenshots in user guide,The screenshots in the user guide are outdated and show the old interface from version 1. They need to be replaced with current screenshots matching the new design.,documentation
+Fix typos and grammar in user manual,The user manual contains numerous typos and grammatical errors that make it difficult to read. A thorough proofreading pass is needed especially in chapters 3 through 7.,documentation
+Improve search functionality in documentation,The documentation search does not return relevant results for common queries. Searching for password reset returns unrelated pages about general settings.,documentation
+Add contributing guide for open source,"The repository is missing a CONTRIBUTING.md file explaining how to set up the development environment, coding standards, and the pull request review process.",documentation
+Implement smart scheduling assistant,Add an intelligent scheduling feature that analyzes team availability and workload to suggest optimal times for meetings and task assignments.,feature
+Add code examples for all REST endpoints,Many REST API endpoints in the reference documentation only have parameter descriptions but no code examples. Please add at least one example request and response for each endpoint.,documentation
+Add troubleshooting section for common errors,A troubleshooting section explaining common error codes and how to resolve them would save users a lot of time. Most questions in the forum are about errors that could be addressed in docs.,documentation
+Improve CLI documentation with more examples,The command line interface documentation lists available commands but lacks practical examples showing real use cases and how to combine commands in shell scripts.,documentation
+Batch delete operation only deletes first item,"When selecting multiple items and clicking delete, only the first selected item gets deleted. The rest remain in the list.",bug
+Add time tracking feature,"Allow users to log time spent on tasks directly in the app with reports showing time breakdown by project, user, and time period.",feature
+Add Gantt chart view for projects,"Provide a Gantt chart visualization for project tasks showing dependencies, timelines, and resource assignments in an interactive draggable interface.",feature
+Add onboarding checklist for new users,A step by step onboarding checklist in the documentation would help new users set up their account and complete the most important configuration steps in the right order.,documentation
+Graph rendering fails with empty datasets,"When a graph component receives an empty array as data, it throws a rendering error instead of displaying a no data message.",bug
+Add migration guide from v1 to v2,Users migrating from version 1 to version 2 have no official guide. The breaking changes need to be documented with before and after code examples.,documentation
+Implement smart notifications with priority,Add an intelligent notification system that categorizes notifications by priority and allows users to set quiet hours and focus modes.,feature
+Add FAQ page for common questions,"A frequently asked questions page would reduce repetitive questions in the support forum. The most common questions are about billing, data limits, and account management.",documentation
