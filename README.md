@@ -150,18 +150,6 @@ Improvements in v2: expanded dataset (300 vs 120 samples), trigrams, balanced cl
 
 ---
 
-## 🐛 Bug Fixes (v2)
-
-Five bugs were identified and fixed:
-
-1. **Critical — Label order mismatch** — the confidence breakdown loop used a hardcoded `[(0,"bug"),(1,"feature"),(2,"documentation")]` order. scikit-learn sorts classes alphabetically, so `documentation` is actually index 1 and `feature` is index 2, not vice versa. Fixed by using `enumerate(classifier.classes_)` as the ground truth.
-2. **Critical — No error handling on missing model files** — `load_all()` now wraps file loading in try/except and shows a clear Streamlit error with the command to run instead of an unhandled crash.
-3. **Minor — Redundant cosine_similarity call** — the Summary section recomputed `cosine_similarity(...)` that had already been computed in the contributor section. Fixed by reusing `contrib_scores`.
-4. **Minor — Missing keys on mock contributors** — `MOCK_CONTRIBUTORS` lacked `profile_url` and `contributions` keys, making `.get()` fallbacks silently return empty values. Fixed by adding those keys to all mock entries.
-5. **Minor — Label names not from single source of truth** — the confidence breakdown used hardcoded label strings instead of reading from `label_map`. Fixed consistently alongside Bug #1.
-
----
-
 ## 💬 Motivation
 
 As a contributor to open source projects through GSSOC, I noticed maintainers manually triaging the same types of issues repeatedly. This project automates those workflows using core NLP and ML techniques.
