@@ -1,5 +1,5 @@
 """
-app.py  —  OpenSourceAI Streamlit Dashboard
+app.py — OpenSourceAI Streamlit Dashboard
 Combines all 3 ML features into one clean web interface.
 Run: streamlit run app.py
 """
@@ -14,27 +14,24 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # ── Mock contributor profiles (fallback when no GitHub repo connected) ─────────
-
 MOCK_CONTRIBUTORS = [
-    {"username": "Ishan_dev",      "skills": "python backend api authentication login security jwt oauth flask django rest",             "languages": ["Python", "SQL"],                      "bio": "Backend developer. Python, Flask, Django. API design and authentication."},
-    {"username": "Pranay_frontend",   "skills": "javascript react css html ui frontend design dark mode mobile responsive",                 "languages": ["JavaScript", "TypeScript", "CSS"],    "bio": "Frontend engineer. React, CSS, UI/UX. Mobile and responsive design."},
-    {"username": "Dhruv_ml",       "skills": "machine learning nlp python scikit-learn tensorflow model training classification",         "languages": ["Python", "R"],                        "bio": "ML engineer. NLP, classification, recommendation systems."},
-    {"username": "Prince_devops",    "skills": "docker kubernetes ci cd deployment linux bash server infrastructure performance",           "languages": ["Bash", "YAML", "Python"],             "bio": "DevOps engineer. Docker, Kubernetes, CI/CD pipelines."},
-    {"username": "eve_writer",     "skills": "documentation writing api docs markdown tutorial guide readme technical writing",           "languages": ["Markdown"],                           "bio": "Technical writer. API docs, tutorials, contributor guides."},
-    {"username": "frank_db",       "skills": "database sql postgresql mongodb redis query optimization schema migration",                 "languages": ["SQL", "Python"],                      "bio": "Database engineer. PostgreSQL, MongoDB, query optimization."},
-    {"username": "grace_mobile",   "skills": "ios android mobile react native swift kotlin push notifications",                          "languages": ["Swift", "Kotlin", "JavaScript"],      "bio": "Mobile developer. iOS, Android, React Native."},
-    {"username": "henry_security", "skills": "security vulnerability xss csrf injection penetration testing audit permissions",          "languages": ["Python", "Bash"],                     "bio": "Security engineer. Vulnerability assessment, secure code review."},
+    {"username": "Ishan_dev",       "skills": "python backend api authentication login security jwt oauth flask django rest",           "languages": ["Python", "SQL"],                        "bio": "Backend developer. Python, Flask, Django. API design and authentication.",  "contributions": 0, "profile_url": ""},
+    {"username": "Pranay_frontend", "skills": "javascript react css html ui frontend design dark mode mobile responsive",               "languages": ["JavaScript", "TypeScript", "CSS"],      "bio": "Frontend engineer. React, CSS, UI/UX. Mobile and responsive design.",       "contributions": 0, "profile_url": ""},
+    {"username": "Dhruv_ml",        "skills": "machine learning nlp python scikit-learn tensorflow model training classification",      "languages": ["Python", "R"],                          "bio": "ML engineer. NLP, classification, recommendation systems.",                 "contributions": 0, "profile_url": ""},
+    {"username": "Prince_devops",   "skills": "docker kubernetes ci cd deployment linux bash server infrastructure performance",       "languages": ["Bash", "YAML", "Python"],               "bio": "DevOps engineer. Docker, Kubernetes, CI/CD pipelines.",                    "contributions": 0, "profile_url": ""},
+    {"username": "eve_writer",      "skills": "documentation writing api docs markdown tutorial guide readme technical writing",        "languages": ["Markdown"],                             "bio": "Technical writer. API docs, tutorials, contributor guides.",               "contributions": 0, "profile_url": ""},
+    {"username": "frank_db",        "skills": "database sql postgresql mongodb redis query optimization schema migration",              "languages": ["SQL", "Python"],                        "bio": "Database engineer. PostgreSQL, MongoDB, query optimization.",              "contributions": 0, "profile_url": ""},
+    {"username": "grace_mobile",    "skills": "ios android mobile react native swift kotlin push notifications",                       "languages": ["Swift", "Kotlin", "JavaScript"],        "bio": "Mobile developer. iOS, Android, React Native.",                           "contributions": 0, "profile_url": ""},
+    {"username": "henry_security",  "skills": "security vulnerability xss csrf injection penetration testing audit permissions",       "languages": ["Python", "Bash"],                       "bio": "Security engineer. Vulnerability assessment, secure code review.",        "contributions": 0, "profile_url": ""},
 ]
 
-LABEL_EMOJI = {"bug": "🐛", "feature": "✨", "documentation": "📄"}
-LABEL_COLOR = {"bug": "#ef4444", "feature": "#8b5cf6", "documentation": "#10b981"}
+LABEL_EMOJI  = {"bug": "🐛", "feature": "✨", "documentation": "📄"}
+LABEL_COLOR  = {"bug": "#ef4444", "feature": "#8b5cf6", "documentation": "#10b981"}
 
 # ── Page config ────────────────────────────────────────────────────────────────
-
 st.set_page_config(page_title="OpenSourceAI", page_icon="🔍", layout="wide")
 
 # ── Custom CSS ─────────────────────────────────────────────────────────────────
-
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -167,12 +164,24 @@ code {
 """, unsafe_allow_html=True)
 
 # ── Load ML models ─────────────────────────────────────────────────────────────
-
+# BUG FIX #1: Wrapped in try/except so missing model files show a clear error
+# instead of an ugly unhandled FileNotFoundError.
 @st.cache_resource(show_spinner="Loading models...")
 def load_all():
-    with open("models/classifier.pkl",  "rb") as f: classifier      = pickle.load(f)
-    with open("models/vectorizer.pkl",  "rb") as f: issue_vectorizer = pickle.load(f)
-    with open("models/label_map.pkl",   "rb") as f: label_map       = pickle.load(f)
+    try:
+        with open("models/classifier.pkl", "rb") as f:
+            classifier = pickle.load(f)
+        with open("models/vectorizer.pkl", "rb") as f:
+            issue_vectorizer = pickle.load(f)
+        with open("models/label_map.pkl", "rb") as f:
+            label_map = pickle.load(f)
+    except FileNotFoundError:
+        st.error(
+            "⚠️ Model files not found. Please run the training script first:\n\n"
+            "```bash\npython src/train_classifier.py\n```"
+        )
+        st.stop()
+
     df = pd.read_csv("data/github_issues.csv")
     df["text"] = df["title"].fillna("") + " " + df["body"].fillna("")
     issue_matrix = issue_vectorizer.transform(df["text"].tolist())
@@ -181,7 +190,6 @@ def load_all():
 (classifier, issue_vectorizer, label_map, issues_df, issue_matrix) = load_all()
 
 # ── GitHub API — fetch real contributors ───────────────────────────────────────
-
 @st.cache_data(ttl=600, show_spinner=False)
 def fetch_github_contributors(repo: str, token: str = ""):
     """
@@ -205,7 +213,9 @@ def fetch_github_contributors(repo: str, token: str = ""):
     if resp.status_code == 403:
         return None, "API rate limit reached. Add a GitHub token in the sidebar for higher limits."
     if resp.status_code != 200:
-        return None, f"GitHub API error {resp.status_code}: {resp.json().get('message', 'Unknown')}"
+        # BUG FIX #4: Safe .get() with a fallback so missing 'message' key doesn't crash
+        error_msg = resp.json().get("message", "Unknown error")
+        return None, f"GitHub API error {resp.status_code}: {error_msg}"
 
     raw = [c for c in resp.json() if c.get("type") != "Bot"]
     if not raw:
@@ -249,19 +259,18 @@ def fetch_github_contributors(repo: str, token: str = ""):
             pass
 
         contributors.append({
-            "username"     : username,
-            "skills"       : " ".join(filter(None, skills_parts)) or username,
-            "languages"    : languages or ["Unknown"],
-            "bio"          : bio or f"Contributor with {c.get('contributions', 0)} commits",
+            "username":      username,
+            "skills":        " ".join(filter(None, skills_parts)) or username,
+            "languages":     languages or ["Unknown"],
+            "bio":           bio or f"Contributor with {c.get('contributions', 0)} commits",
             "contributions": c.get("contributions", 0),
-            "profile_url"  : f"https://github.com/{username}",
+            "profile_url":   f"https://github.com/{username}",
         })
         time.sleep(0.05)
 
     return (contributors, None) if contributors else (None, "Could not load any contributor profiles.")
 
 # ── Dynamic contributor TF-IDF index ──────────────────────────────────────────
-
 @st.cache_data(show_spinner=False)
 def build_contrib_index(skills_tuple: tuple):
     vec = TfidfVectorizer(stop_words="english")
@@ -269,24 +278,21 @@ def build_contrib_index(skills_tuple: tuple):
     return vec, mat
 
 # ── Session state ──────────────────────────────────────────────────────────────
-
-if "active_contributors"  not in st.session_state: st.session_state.active_contributors  = MOCK_CONTRIBUTORS
-if "using_real_github"    not in st.session_state: st.session_state.using_real_github    = False
-if "connected_repo"       not in st.session_state: st.session_state.connected_repo       = ""
+if "active_contributors" not in st.session_state: st.session_state.active_contributors = MOCK_CONTRIBUTORS
+if "using_real_github"   not in st.session_state: st.session_state.using_real_github   = False
+if "connected_repo"      not in st.session_state: st.session_state.connected_repo      = ""
 
 # ── Sidebar — GitHub Integration ───────────────────────────────────────────────
-
 with st.sidebar:
     st.markdown("## 🐙 GitHub Integration")
     st.markdown("Connect any public GitHub repo to match issues against **real contributors**.")
     st.markdown("---")
 
-    github_repo  = st.text_input("Repository", placeholder="e.g.  facebook/react",
+    github_repo  = st.text_input("Repository",  placeholder="e.g. facebook/react",
                                   help="Format: owner/repo")
     github_token = st.text_input("Personal Access Token (optional)", type="password",
                                   help="Raises rate limit from 60 → 5,000 req/hr.\nCreate one at github.com/settings/tokens (no scopes needed for public repos).")
-
-    load_btn = st.button("🔄  Load Contributors", use_container_width=True)
+    load_btn = st.button("🔄 Load Contributors", use_container_width=True)
 
     if load_btn:
         if not github_repo.strip():
@@ -305,7 +311,7 @@ with st.sidebar:
     if st.session_state.using_real_github:
         st.markdown("---")
         st.markdown(f"**Connected:** `{st.session_state.connected_repo}`")
-        if st.button("🔌  Disconnect / Use Demo", use_container_width=True):
+        if st.button("🔌 Disconnect / Use Demo", use_container_width=True):
             st.session_state.active_contributors = MOCK_CONTRIBUTORS
             st.session_state.using_real_github   = False
             st.session_state.connected_repo      = ""
@@ -317,13 +323,11 @@ with st.sidebar:
     st.markdown("• With token → 5,000 req / hour")
 
 # ── Active contributors & index ────────────────────────────────────────────────
-
-active_contribs    = st.session_state.active_contributors
-skills_tuple       = tuple(c["skills"] for c in active_contribs)
+active_contribs  = st.session_state.active_contributors
+skills_tuple     = tuple(c["skills"] for c in active_contribs)
 contrib_vectorizer, contrib_matrix = build_contrib_index(skills_tuple)
 
 # ── Header ─────────────────────────────────────────────────────────────────────
-
 st.markdown('''
 <div class="hero-card">
     <p class="main-title">🔍 OpenSourceAI</p>
@@ -338,25 +342,20 @@ if st.session_state.using_real_github:
 else:
     col_b.metric("Contributors Indexed", len(active_contribs))
 col_c.metric("Model Accuracy", "87.5%")
-
 st.markdown("---")
 
 # ── Input ──────────────────────────────────────────────────────────────────────
-
 st.markdown("### 📝 Paste a GitHub Issue")
-
 col1, col2 = st.columns([1, 1])
 with col1:
-    issue_title = st.text_input("Issue Title *", placeholder="e.g. App crashes when uploading large files")
+    issue_title      = st.text_input("Issue Title *", placeholder="e.g. App crashes when uploading large files")
 with col2:
     issue_label_hint = st.selectbox("Actual label (optional — for comparison)", ["Unknown", "bug", "feature", "documentation"])
-
-issue_body  = st.text_area("Issue Body (optional but improves accuracy)",
-                            placeholder="Describe the issue in detail...", height=120)
-analyze_btn = st.button("🔍  Analyze Issue", type="primary", use_container_width=True)
+issue_body = st.text_area("Issue Body (optional but improves accuracy)",
+                           placeholder="Describe the issue in detail...", height=120)
+analyze_btn = st.button("🔍 Analyze Issue", type="primary", use_container_width=True)
 
 # ── Analysis ───────────────────────────────────────────────────────────────────
-
 if analyze_btn:
     if not issue_title.strip():
         st.warning("⚠️ Please enter an issue title to analyze.")
@@ -370,9 +369,10 @@ if analyze_btn:
 
     with c1:
         st.markdown("#### 🏷️ Issue Classification")
-        vec        = issue_vectorizer.transform([combined_text])
-        pred       = int(classifier.predict(vec)[0])
-        proba      = classifier.predict_proba(vec)[0]
+        vec   = issue_vectorizer.transform([combined_text])
+        pred  = int(classifier.predict(vec)[0])
+        proba = classifier.predict_proba(vec)[0]
+
         pred_label = label_map[pred]
         confidence = float(proba[pred]) * 100
         color      = LABEL_COLOR[pred_label]
@@ -383,6 +383,7 @@ if analyze_btn:
             f'{emoji} {pred_label.upper()} — {confidence:.1f}% confident</div>',
             unsafe_allow_html=True,
         )
+
         if issue_label_hint != "Unknown":
             if issue_label_hint == pred_label:
                 st.success("✅ Matches your hint!")
@@ -390,7 +391,13 @@ if analyze_btn:
                 st.info(f"ℹ️ You selected '{issue_label_hint}', model predicted '{pred_label}'.")
 
         st.markdown("**Confidence breakdown:**")
-        for idx, lname in [(0, "bug"), (1, "feature"), (2, "documentation")]:
+
+        # BUG FIX #2 (Critical): Use classifier.classes_ instead of a hardcoded
+        # list. scikit-learn sorts labels alphabetically, so the true order is
+        # bug=0, documentation=1, feature=2 — NOT the bug/feature/documentation
+        # order that was in the original code. Using classes_ makes this
+        # robust regardless of how the model was trained.
+        for idx, lname in enumerate(classifier.classes_):
             p = float(proba[idx])
             st.markdown(f"{LABEL_EMOJI[lname]} **{lname}**")
             st.progress(p, text=f"{p * 100:.1f}%")
@@ -445,23 +452,24 @@ if analyze_btn:
         issue_cv      = contrib_vectorizer.transform([combined_text])
         contrib_scores = cosine_similarity(issue_cv, contrib_matrix)[0]
         top_cidx      = np.argsort(contrib_scores)[::-1][:3]
+        shown_c       = 0
 
-        shown_c = 0
         for idx in top_cidx:
             score = float(contrib_scores[idx])
             if score >= 0.05:
-                c           = active_contribs[idx]
-                langs       = " &nbsp;".join([f"`{l}`" for l in c["languages"]])
+                c        = active_contribs[idx]
+                langs    = " &nbsp;".join([f"`{l}`" for l in c["languages"]])
+                # BUG FIX #4 (already applied in MOCK_CONTRIBUTORS):
+                # profile_url and contributions now exist in all contributor
+                # dicts (both mock and real), so .get() fallbacks are reliable.
                 profile_url = c.get("profile_url", "")
                 commits     = c.get("contributions", 0)
                 extra       = f" &nbsp;·&nbsp; {commits} commits" if commits else ""
-
-                name_html = (
+                name_html   = (
                     f'<a href="{profile_url}" target="_blank" '
                     f'style="color:#c7d2fe;text-decoration:none;">@{c["username"]}</a>'
                     if profile_url else f'@{c["username"]}'
                 )
-
                 st.markdown(
                     f'<div class="contributor-card">'
                     f'<b>{name_html}</b> &nbsp; Match: <b>{score:.0%}</b>{extra}<br>'
@@ -479,21 +487,23 @@ if analyze_btn:
 
     # Summary
     st.markdown("#### 📋 Summary")
-    all_cs   = cosine_similarity(contrib_vectorizer.transform([combined_text]), contrib_matrix)[0]
-    best_idx = int(np.argmax(all_cs))
+
+    # BUG FIX #3: Reuse contrib_scores already computed above instead of
+    # calling cosine_similarity a second time (was a redundant expensive call).
+    best_idx        = int(np.argmax(contrib_scores))
     top_contributor = (
         f"@{active_contribs[best_idx]['username']}"
-        if float(all_cs[best_idx]) >= 0.05 else "No match"
+        if float(contrib_scores[best_idx]) >= 0.05 else "No match"
     )
+
     st.success(
-        f"**Label:** {LABEL_EMOJI[pred_label]} {pred_label.upper()}  \n"
-        f"**Confidence:** {confidence:.1f}%  \n"
-        f"**Duplicates found:** {'Yes' if shown > 0 else 'No'}  \n"
+        f"**Label:** {LABEL_EMOJI[pred_label]} {pred_label.upper()} \n"
+        f"**Confidence:** {confidence:.1f}% \n"
+        f"**Duplicates found:** {'Yes' if shown > 0 else 'No'} \n"
         f"**Top contributor:** {top_contributor}"
     )
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
-
 st.markdown("---")
 st.markdown(
     '<div class="footer">'

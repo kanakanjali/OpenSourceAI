@@ -1,99 +1,67 @@
 """
-duplicate_detector.py
-Detects duplicate / similar GitHub issues using TF-IDF cosine similarity.
+src/duplicate_detector.py — Standalone duplicate/similarity detection.
 
-Note: We use TF-IDF cosine similarity here (no extra dependencies).
-If you want even better results, swap in sentence-transformers later.
-
-Run standalone: python src/duplicate_detector.py
+Usage:
+    from src.duplicate_detector import DuplicateDetector
+    detector = DuplicateDetector("data/github_issues.csv")
+    results  = detector.find_similar("App crashes on login", top_k=5, threshold=0.15)
 """
 
-import pandas as pd
 import pickle
+import pandas as pd
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# ── Load models and data ──────────────────────────────────────────────────────
 
-def load_detector():
-    """Load vectorizer and issue database. Returns (vectorizer, df, matrix)."""
-    with open("models/vectorizer.pkl", "rb") as f:
-        vectorizer = pickle.load(f)
+class DuplicateDetector:
+    def __init__(self, csv_path: str, vectorizer_path: str = "models/vectorizer.pkl"):
+        self.df = pd.read_csv(csv_path)
+        self.df["text"] = self.df["title"].fillna("") + " " + self.df["body"].fillna("")
 
-    df = pd.read_csv("data/github_issues.csv")
-    df["text"] = df["title"].fillna("") + " " + df["body"].fillna("")
+        # Reuse the same vectorizer fitted during training for consistency
+        try:
+            with open(vectorizer_path, "rb") as f:
+                self.vectorizer = pickle.load(f)
+        except FileNotFoundError:
+            # Fallback: fit a fresh vectorizer on the dataset
+            self.vectorizer = TfidfVectorizer(
+                ngram_range=  (1, 3),
+                sublinear_tf= True,
+                max_features= 5000,
+                stop_words=   "english",
+            )
+            self.vectorizer.fit(self.df["text"].tolist())
 
-    # Pre-compute TF-IDF matrix for all existing issues
-    issue_matrix = vectorizer.transform(df["text"].tolist())
+        self.issue_matrix = self.vectorizer.transform(self.df["text"].tolist())
 
-    return vectorizer, df, issue_matrix
+    def find_similar(self, query: str, top_k: int = 5, threshold: float = 0.15):
+        """
+        Return up to top_k issues whose cosine similarity to `query` is >= threshold.
 
+        Returns a list of dicts with keys: title, label, similarity.
+        """
+        vec    = self.vectorizer.transform([query])
+        scores = cosine_similarity(vec, self.issue_matrix)[0]
+        top_idx = np.argsort(scores)[::-1][:top_k]
 
-# ── Core function ─────────────────────────────────────────────────────────────
+        results = []
+        for idx in top_idx:
+            sim = float(scores[idx])
+            if sim >= threshold:
+                row = self.df.iloc[idx]
+                results.append({
+                    "title":      row["title"],
+                    "label":      row["label"],
+                    "similarity": round(sim, 4),
+                })
+        return results
 
-def find_similar_issues(new_issue_text, vectorizer, df, issue_matrix,
-                        top_k=5, threshold=0.20):
-    """
-    Given a new issue text, return the most similar existing issues.
-
-    Args:
-        new_issue_text : str   - title + body of the incoming issue
-        vectorizer     : fitted TfidfVectorizer
-        df             : DataFrame of existing issues
-        issue_matrix   : pre-computed TF-IDF matrix of existing issues
-        top_k          : int   - max number of results to return
-        threshold      : float - minimum similarity score (0-1)
-
-    Returns:
-        list of dicts with keys: title, label, similarity
-    """
-    if not new_issue_text.strip():
-        return []
-
-    new_vec = vectorizer.transform([new_issue_text])
-    scores  = cosine_similarity(new_vec, issue_matrix)[0]
-
-    top_indices = np.argsort(scores)[::-1][:top_k]
-
-    results = []
-    for idx in top_indices:
-        sim = float(scores[idx])
-        if sim >= threshold:
-            results.append({
-                "title"      : df.iloc[idx]["title"],
-                "label"      : df.iloc[idx]["label"],
-                "similarity" : round(sim, 3),
-            })
-
-    return results
-
-
-# ── Standalone test ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    vectorizer, df, issue_matrix = load_detector()
-
-    test_cases = [
-        "Application crashes when uploading large files on mobile devices",
-        "Add dark mode option to the settings page",
-        "API documentation is missing code examples",
-        "Login page shows 500 error after submitting the form",
-        "Export functionality should support Excel format",
-    ]
-
-    print("Duplicate / Similar Issue Detection")
-    print("=" * 60)
-
-    for query in test_cases:
-        print(f"\nNew Issue  : {query}")
-        results = find_similar_issues(query, vectorizer, df, issue_matrix,
-                                      top_k=3, threshold=0.15)
-        if results:
-            print("Similar issues found:")
-            for r in results:
-                print(f"  [{r['label'].upper():13}] {r['similarity']:.0%} — {r['title']}")
-        else:
-            print("  No similar issues found.")
-
-    print("\n" + "=" * 60)
-    print("Detector working correctly!")
+    detector = DuplicateDetector("data/github_issues.csv")
+    query    = "App crashes when uploading large files"
+    results  = detector.find_similar(query)
+    print(f"Issues similar to: '{query}'\n")
+    for r in results:
+        print(f"  [{r['label']:13}] {r['similarity']:.0%}  —  {r['title']}")

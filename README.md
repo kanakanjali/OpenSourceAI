@@ -1,19 +1,21 @@
 # 🔍 OpenSourceAI
+
 ### Intelligent Open Source Maintainer & Contributor Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10+-green.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-deployed-red.svg)
+[![Python](https://img.shields.io/badge/Python-3.10+-green.svg)]()
+[![Streamlit](https://img.shields.io/badge/Streamlit-deployed-red.svg)]()
 
 An ML-powered tool that automates GitHub issue triage using NLP and machine learning. Built to solve a real problem I personally experienced as an open source contributor.
 
-> 🚀 **Live Demo:** [Add your link here after deploying]
+> 🚀 **Live Demo:** https://opensourceaigit-wzlncnldkmhdvwjyectdmb.streamlit.app/
 
 ---
 
 ## 🎯 Problem
 
 Open source maintainers spend significant time on repetitive triage tasks:
+
 - Manually categorizing every incoming issue
 - Identifying duplicate issues that have already been reported
 - Figuring out which contributor is best suited for each issue
@@ -36,10 +38,11 @@ OpenSourceAI automates three core maintainer workflows:
 
 ## 🧠 ML Concepts Used
 
-- **Text Vectorization** — TF-IDF with unigrams and bigrams, sublinear TF scaling
-- **Multi-class Classification** — Logistic Regression with softmax, evaluated using precision / recall / F1
+- **Text Vectorization** — TF-IDF with unigrams, bigrams, and trigrams; sublinear TF scaling
+- **Multi-class Classification** — Logistic Regression with balanced class weights; evaluated using precision / recall / F1
 - **Cosine Similarity** — Measures semantic closeness between issue texts and contributor profiles
-- **Feature Engineering** — Combining title + body, stop word removal, n-gram features
+- **Cross-Validation** — 5-fold CV for honest accuracy estimate on relatively small datasets
+- **Feature Engineering** — Title + body concatenation, stop word removal, n-gram features
 
 ---
 
@@ -49,13 +52,13 @@ OpenSourceAI automates three core maintainer workflows:
 OpenSourceAI/
 │
 ├── data/
-│   ├── github_issues.csv          # Training dataset (120 labeled issues)
-│   └── generate_dataset.py        # Script to regenerate dataset
+│   ├── github_issues.csv          # Training dataset (300 labeled issues)
+│   └── generate_dataset.py        # Script to regenerate / expand dataset
 │
 ├── models/
 │   ├── classifier.pkl             # Trained Logistic Regression model
 │   ├── vectorizer.pkl             # Fitted TF-IDF vectorizer
-│   └── label_map.pkl              # Integer to label mapping
+│   └── label_map.pkl              # Integer to label mapping (from classifier.classes_)
 │
 ├── src/
 │   ├── train_classifier.py        # Feature 1: trains and evaluates classifier
@@ -64,6 +67,9 @@ OpenSourceAI/
 │
 ├── .streamlit/
 │   └── config.toml                # Dark theme configuration
+│
+├── .devcontainer/
+│   └── devcontainer.json          # One-click GitHub Codespaces setup
 │
 ├── app.py                         # Streamlit dashboard (all 3 features)
 ├── requirements.txt
@@ -76,17 +82,27 @@ OpenSourceAI/
 ## 🚀 How to Run
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/kanakanjali/OpenSourceAI.git
 cd OpenSourceAI
 ```
 
 **2. Install dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-**3. Run the app**
+**3. Generate data + train models** *(skip if pre-trained `.pkl` files are already in `models/`)*
+
+```bash
+python data/generate_dataset.py   # creates data/github_issues.csv
+python src/train_classifier.py    # creates models/*.pkl
+```
+
+**4. Run the app**
+
 ```bash
 streamlit run app.py
 ```
@@ -110,12 +126,15 @@ The sidebar lets you connect any public GitHub repository to fetch **real contri
 
 ## 📊 Model Performance
 
-| Metric | Score |
-|---|---|
-| Accuracy | **87.5%** |
-| Bug F1 | 0.80 |
-| Feature F1 | 0.82 |
-| Documentation F1 | 1.00 |
+| Metric | v1 (120 samples) | v2 (300 samples) |
+|---|---|---|
+| CV Accuracy | — | **96.0% ± 2.9%** |
+| Hold-out Accuracy | 87.5% | **91.7%** |
+| Bug F1 | 0.80 | **0.87** |
+| Feature F1 | 0.82 | **0.90** |
+| Documentation F1 | 1.00 | **0.97** |
+
+Improvements in v2: expanded dataset (300 vs 120 samples), trigrams, balanced class weights, 5-fold cross-validation.
 
 ---
 
@@ -128,6 +147,18 @@ The sidebar lets you connect any public GitHub repository to fetch **real contri
 | Data | Pandas, NumPy |
 | Frontend | Streamlit |
 | API | GitHub REST API v3 |
+
+---
+
+## 🐛 Bug Fixes (v2)
+
+Five bugs were identified and fixed:
+
+1. **Critical — Label order mismatch** — the confidence breakdown loop used a hardcoded `[(0,"bug"),(1,"feature"),(2,"documentation")]` order. scikit-learn sorts classes alphabetically, so `documentation` is actually index 1 and `feature` is index 2, not vice versa. Fixed by using `enumerate(classifier.classes_)` as the ground truth.
+2. **Critical — No error handling on missing model files** — `load_all()` now wraps file loading in try/except and shows a clear Streamlit error with the command to run instead of an unhandled crash.
+3. **Minor — Redundant cosine_similarity call** — the Summary section recomputed `cosine_similarity(...)` that had already been computed in the contributor section. Fixed by reusing `contrib_scores`.
+4. **Minor — Missing keys on mock contributors** — `MOCK_CONTRIBUTORS` lacked `profile_url` and `contributions` keys, making `.get()` fallbacks silently return empty values. Fixed by adding those keys to all mock entries.
+5. **Minor — Label names not from single source of truth** — the confidence breakdown used hardcoded label strings instead of reading from `label_map`. Fixed consistently alongside Bug #1.
 
 ---
 
