@@ -47,8 +47,14 @@ class ContributorRecommender:
 
 
 if __name__ == "__main__":
-    from app import MOCK_CONTRIBUTORS
-    rec     = ContributorRecommender(MOCK_CONTRIBUTORS)
+    # Inline demo profiles so this script runs without importing Streamlit via app.py
+    _DEMO_CONTRIBUTORS = [
+        {"username": "Ishan_dev",       "skills": "python backend api authentication login security jwt oauth flask django rest",      "languages": ["Python", "SQL"],               "bio": "Backend developer. Python, Flask, Django.",    "contributions": 0, "profile_url": ""},
+        {"username": "Pranay_frontend", "skills": "javascript react css html ui frontend design dark mode mobile responsive",          "languages": ["JavaScript", "TypeScript"],     "bio": "Frontend engineer. React, CSS, UI/UX.",        "contributions": 0, "profile_url": ""},
+        {"username": "Dhruv_ml",        "skills": "machine learning nlp python scikit-learn tensorflow model training classification", "languages": ["Python", "R"],                  "bio": "ML engineer. NLP, classification.",            "contributions": 0, "profile_url": ""},
+        {"username": "Prince_devops",   "skills": "docker kubernetes ci cd deployment linux bash server infrastructure performance",   "languages": ["Bash", "YAML", "Python"],       "bio": "DevOps engineer. Docker, Kubernetes, CI/CD.", "contributions": 0, "profile_url": ""},
+    ]
+    rec     = ContributorRecommender(_DEMO_CONTRIBUTORS)
     query   = "App crashes when uploading large files on mobile"
     results = rec.recommend(query)
     print(f"Top contributors for: '{query}'\n")

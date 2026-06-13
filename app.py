@@ -164,8 +164,6 @@ code {
 """, unsafe_allow_html=True)
 
 # ── Load ML models ─────────────────────────────────────────────────────────────
-# BUG FIX #1: Wrapped in try/except so missing model files show a clear error
-# instead of an ugly unhandled FileNotFoundError.
 @st.cache_resource(show_spinner="Loading models...")
 def load_all():
     try:
@@ -213,7 +211,6 @@ def fetch_github_contributors(repo: str, token: str = ""):
     if resp.status_code == 403:
         return None, "API rate limit reached. Add a GitHub token in the sidebar for higher limits."
     if resp.status_code != 200:
-        # BUG FIX #4: Safe .get() with a fallback so missing 'message' key doesn't crash
         error_msg = resp.json().get("message", "Unknown error")
         return None, f"GitHub API error {resp.status_code}: {error_msg}"
 
@@ -369,12 +366,13 @@ if analyze_btn:
 
     with c1:
         st.markdown("#### 🏷️ Issue Classification")
-        vec   = issue_vectorizer.transform([combined_text])
-        pred  = int(classifier.predict(vec)[0])
-        proba = classifier.predict_proba(vec)[0]
+        vec        = issue_vectorizer.transform([combined_text])
+        pred_label = str(classifier.predict(vec)[0])
+        proba      = classifier.predict_proba(vec)[0]
 
-        pred_label = label_map[pred]
-        confidence = float(proba[pred]) * 100
+        # classifier.classes_ is the authoritative order for proba indices
+        pred_idx   = list(classifier.classes_).index(pred_label)
+        confidence = float(proba[pred_idx]) * 100
         color      = LABEL_COLOR[pred_label]
         emoji      = LABEL_EMOJI[pred_label]
 
@@ -392,11 +390,8 @@ if analyze_btn:
 
         st.markdown("**Confidence breakdown:**")
 
-        # BUG FIX #2 (Critical): Use classifier.classes_ instead of a hardcoded
-        # list. scikit-learn sorts labels alphabetically, so the true order is
-        # bug=0, documentation=1, feature=2 — NOT the bug/feature/documentation
-        # order that was in the original code. Using classes_ makes this
-        # robust regardless of how the model was trained.
+        # classifier.classes_ is the authoritative label order (sorted alphabetically
+        # by sklearn). proba[idx] lines up exactly with classes_[idx].
         for idx, lname in enumerate(classifier.classes_):
             p = float(proba[idx])
             st.markdown(f"{LABEL_EMOJI[lname]} **{lname}**")
@@ -459,9 +454,6 @@ if analyze_btn:
             if score >= 0.05:
                 c        = active_contribs[idx]
                 langs    = " &nbsp;".join([f"`{l}`" for l in c["languages"]])
-                # BUG FIX #4 (already applied in MOCK_CONTRIBUTORS):
-                # profile_url and contributions now exist in all contributor
-                # dicts (both mock and real), so .get() fallbacks are reliable.
                 profile_url = c.get("profile_url", "")
                 commits     = c.get("contributions", 0)
                 extra       = f" &nbsp;·&nbsp; {commits} commits" if commits else ""
@@ -488,8 +480,7 @@ if analyze_btn:
     # Summary
     st.markdown("#### 📋 Summary")
 
-    # BUG FIX #3: Reuse contrib_scores already computed above instead of
-    # calling cosine_similarity a second time (was a redundant expensive call).
+    # Reuse contrib_scores already computed above (avoids a redundant cosine_similarity call)
     best_idx        = int(np.argmax(contrib_scores))
     top_contributor = (
         f"@{active_contribs[best_idx]['username']}"

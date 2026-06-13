@@ -128,11 +128,11 @@ The sidebar lets you connect any public GitHub repository to fetch **real contri
 
 | Metric | v1 (120 samples) | v2 (300 samples) |
 |---|---|---|
-| CV Accuracy | — | **96.0% ± 2.9%** |
-| Hold-out Accuracy | 87.5% | **91.7%** |
+| Hold-out Accuracy | — | **87.5%** |
 | Bug F1 | 0.80 | **0.87** |
 | Feature F1 | 0.82 | **0.90** |
 | Documentation F1 | 1.00 | **0.97** |
+| CV Folds | — | 5-fold |
 
 Improvements in v2: expanded dataset (300 vs 120 samples), trigrams, balanced class weights, 5-fold cross-validation.
 
